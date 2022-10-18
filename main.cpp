@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <vector>
 #include <map>
+#include <cstring>
 
 #include "config.h"
 
@@ -38,7 +39,6 @@ void /**over*/write(std::string fp, std::string c) {
 }
 
 // sanitise characters to html-safe
-// [Possible TODO]: Move to param pack, so strings can also be sanitised
 std::string sanitise(char c) {
   switch (c) {
     case '&':
@@ -52,6 +52,14 @@ std::string sanitise(char c) {
       return r;
   }
 }
+std::string sanitise(std::string s) {
+  std::string r;
+  for (auto& c: s) {
+    if (c == '\\') continue; // skip the escape character
+    r.append(sanitise(c));
+  }
+  return r;
+}
 
 void generate(std::filesystem::path fp) {
   std::string raw = read(fp.c_str());
@@ -60,14 +68,14 @@ void generate(std::filesystem::path fp) {
   // - read ':' pairs into a map
   // - return index of first line of content
  
-  //[TODO] : Current Focus
+  //[TODO] : fix
   std::string head = raw.substr(4, raw.find("---", 4)-5);
   std::map<std::string, std::vector<std::string>> header;
   unsigned int i = 0; while(i < head.size()) { 
     size_t j = head.find(':', i); if (j == std::string::npos) break; 
     std::string k = head.substr(i, j-i); // account for space taken by colon
     std::string v = head.substr(j+2, head.find('\n', j)-j+2);
-    std::cout << k << ':' << v << '\n'; // DEBUG
+    //std::cout << k << ':' << v << '\n'; // DEBUG
     i = (j+1)+(v.size()); // account for the space between the colon and the value, and for the newline character after the value (size is index'd on 1)
   }
   // [TODO] apply meta data to html
@@ -90,14 +98,12 @@ void generate(std::filesystem::path fp) {
 
     // check for special characters
     switch (c) {
-      case '$':
-        {
-          // mathjax (pain) TODO
-          // skip ahead
-          const char* match = (raw.at(i+1) == '$') ? "$$" : "$";
-          i+=raw.find(match, i)-i;
-          break;
-        }
+      case '$': // mathjax (pain) TODO 
+        break;
+      case '\n': // newline
+        if (raw.at(i-1) == '\n') continue; // ignore double newlines
+        html.append("\n<br>\n");
+        break;
       case '>': // block qoutes (TODO)
         break;
       case '#': // headers
@@ -107,9 +113,23 @@ void generate(std::filesystem::path fp) {
           std::string e = raw.substr(ii, raw.find("\n", ii)-ii); // content 
           html.append(tag(strf("h",s).c_str(), e.c_str()));
           i+=(s+e.size());
-          break;
         }
+        break;
       case '[': // link
+        {
+          if (raw.at(i+1) == '^') { // endnote [TODO]
+
+          } else { // url
+            size_t alias_len = raw.find(']', i+1);
+            if (raw.at(alias_len-1) == '\\') alias_len = raw.find(']', alias_len+1); // check for escaped brackets
+            std::string alias = raw.substr(i+1, alias_len-1-i); // (pos of bracket - size of bracket) - initial index
+            size_t url_len = raw.find(')', alias_len);
+            std::string url = raw.substr(alias_len+2, url_len-alias_len-2); // (pos of para - pos bracket) - size of para(s) 
+            std::cout << sanitise(alias) << ':' << url << '\n'; // DEBUG
+            html.append(strf("<a href=", url, "\">", sanitise(alias), "</a>"));
+            i+=(alias.size()+url.size()+3); // content, [,],(,) => size is indexed on 1, so we only add 3
+          }
+        }
         break;
       case '*': // italic (or) bold
         {
