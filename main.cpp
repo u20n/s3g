@@ -61,6 +61,81 @@ std::string sanitise(std::string s) {
   return r;
 }
 
+std::string translate(std::string s) {
+  std::string r;
+  for (unsigned int i=0; i<s.size(); i++) {
+    const char c = s.at(i); 
+    if (
+        c == '\\' && 
+        s.at(i+1) 
+          != ('\r' || '\n')
+        ) {
+      r.append(sanitise(s.at(i+1))); i++; continue; // escape
+    }
+
+    // check for special characters
+    switch (c) {
+      case '$': // mathjax (pain) TODO 
+        break;
+      case '\n': // newline
+        if (s.at(i-1) == '\n') continue; // ignore double newlines
+        r.append("\n<br>\n");
+        break;
+      case '>': // block qoutes
+        {
+          size_t end = s.find("\n", i+2)-(i+2);
+          std::string inner = translate(s.substr(i+2, end)); // parse inter-qoute content
+          r.append(tag("qoute", inner));
+          i += end+1; // account for extra newline
+        }
+        break;
+      case '#': // headers
+        {
+          unsigned int h = s.find(' ', i)-i; // determine size of header
+          unsigned int ii = i+h+1; // e.g. (#### abcdefg), would be index of 'a'
+          std::string e = s.substr(ii, s.find("\n", ii)-ii); // content 
+          r.append(tag(strf("h",h).c_str(), e.c_str()));
+          i+=(h+e.size());
+        }
+        break;
+      case '[': // link
+        {
+          if (s.at(i+1) == '^') { // endnote [TODO]
+
+          } else { // url
+            size_t alias_len = s.find(']', i+1);
+            if (s.at(alias_len-1) == '\\') alias_len = s.find(']', alias_len+1); // check for escaped brackets
+            std::string alias = s.substr(i+1, alias_len-1-i); // (pos of bracket - size of bracket) - initial index
+            size_t url_len = s.find(')', alias_len);
+            std::string url = s.substr(alias_len+2, url_len-alias_len-2); // (pos of para - pos bracket) - size of para(s) 
+            std::cout << sanitise(alias) << ':' << url << '\n'; // DEBUG
+            r.append(strf("<a href=", url, "\">", sanitise(alias), "</a>"));
+            i+=(alias.size()+url.size()+3); // content, [,],(,) => size is indexed on 1, so we only add 3
+          }
+        }
+        break;
+      case '*': // italic (or) bold
+        {
+          // [TODO]: doesn't handle nested bold+italics
+          const char* type; unsigned int ii;/**index*/ const char* mc; // match-case
+          if (s.at(i+1) == '*') { // bold
+            ii = i+2; type = "b"; mc = "**";
+          } else { // italic
+            ii = i+1; type = "i"; mc = "*";
+          }
+          std::string e = s.substr(ii, s.find(mc, ii)-ii);
+          r.append(tag(type, e.c_str())); 
+          i+=((ii-i)*2+e.size());
+        }
+        break;
+      default:
+        // TODO: paragraph typing, e.g. <p> for normal text
+        r.append(sanitise(c));
+    }
+  }
+  return r;
+}
+
 void generate(std::filesystem::path fp) {
   std::string raw = read(fp.c_str());
   std::string html("<!DOCTYPE html>\n<html>\n<head>"); 
@@ -85,71 +160,7 @@ void generate(std::filesystem::path fp) {
   // - translate markdown to html
   // - apply default style
   // - apply any qualifiying styles 
-  
-  for (unsigned int i=head.size()-1; i<raw.size(); i++) {
-    const char c = raw.at(i); 
-    if (
-        c == '\\' && 
-        raw.at(i+1) 
-          != ('\r' || '\n')
-        ) {
-      html.append(sanitise(raw.at(i+1))); i++; continue; // escape
-    }
-
-    // check for special characters
-    switch (c) {
-      case '$': // mathjax (pain) TODO 
-        break;
-      case '\n': // newline
-        if (raw.at(i-1) == '\n') continue; // ignore double newlines
-        html.append("\n<br>\n");
-        break;
-      case '>': // block qoutes (TODO)
-        break;
-      case '#': // headers
-        {
-          unsigned int s = raw.find(' ', i)-i; // determine size of header
-          unsigned int ii = i+s+1; // e.g. (#### abcdefg), would be index of 'a'
-          std::string e = raw.substr(ii, raw.find("\n", ii)-ii); // content 
-          html.append(tag(strf("h",s).c_str(), e.c_str()));
-          i+=(s+e.size());
-        }
-        break;
-      case '[': // link
-        {
-          if (raw.at(i+1) == '^') { // endnote [TODO]
-
-          } else { // url
-            size_t alias_len = raw.find(']', i+1);
-            if (raw.at(alias_len-1) == '\\') alias_len = raw.find(']', alias_len+1); // check for escaped brackets
-            std::string alias = raw.substr(i+1, alias_len-1-i); // (pos of bracket - size of bracket) - initial index
-            size_t url_len = raw.find(')', alias_len);
-            std::string url = raw.substr(alias_len+2, url_len-alias_len-2); // (pos of para - pos bracket) - size of para(s) 
-            std::cout << sanitise(alias) << ':' << url << '\n'; // DEBUG
-            html.append(strf("<a href=", url, "\">", sanitise(alias), "</a>"));
-            i+=(alias.size()+url.size()+3); // content, [,],(,) => size is indexed on 1, so we only add 3
-          }
-        }
-        break;
-      case '*': // italic (or) bold
-        {
-          // [TODO]: doesn't handle nested bold+italics
-          const char* type; unsigned int ii;/**index*/ const char* mc; // match-case
-          if (raw.at(i+1) == '*') { // bold
-            ii = i+2; type = "b"; mc = "**";
-          } else { // italic
-            ii = i+1; type = "i"; mc = "*";
-          }
-          std::string e = raw.substr(ii, raw.find(mc, ii)-ii);
-          html.append(tag(type, e.c_str())); 
-          i+=((ii-i)*2+e.size());
-          break;
-        }
-      default:
-        // TODO: paragraph typing, e.g. <p> for normal text
-        html.append(sanitise(c));
-    }
-  }
+  html.append(translate(raw.substr(head.size()-1)));
   write(
       strf(
         OUT_DIR,
