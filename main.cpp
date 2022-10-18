@@ -38,6 +38,7 @@ void /**over*/write(std::string fp, std::string c) {
 }
 
 // sanitise characters to html-safe
+// [Possible TODO]: Move to param pack, so strings can also be sanitised
 std::string sanitise(char c) {
   switch (c) {
     case '&':
@@ -55,9 +56,7 @@ std::string sanitise(char c) {
 void generate(std::filesystem::path fp) {
   std::string raw = read(fp.c_str());
   std::string html("<!DOCTYPE html>\n<html>\n<head>"); 
-  // == header ==
-  // find the first '-'
-  // - go until line break
+  // == header == 
   // - read ':' pairs into a map
   // - return index of first line of content
  
