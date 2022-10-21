@@ -19,7 +19,6 @@ std::string strf(T... t) {
 }
 
 // produces a tagged string with signature of type, and optional arguments; e.g. href
-template<typename... T>
 std::string tag(std::string type, std::string content, std::string args="") {
   if (!args.empty()) args = std::string(" "+args);
   return std::string(strf("<",type,args,">",content,"</",type,">"));
@@ -134,8 +133,7 @@ std::string parse(std::string s) {
           i+=((ii-i)*2+e.size());
         }
         break;
-      default:
-        // TODO: paragraph typing, e.g. <p> for normal text
+      default: 
         r.append(sanitise(c));
     }
   }
