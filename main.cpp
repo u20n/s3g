@@ -87,7 +87,7 @@ std::string parse(std::string s) {
               );
             sl = cl+5; // account for beginning "$\n" and trailing "\n$$" (we only have to add five because i is the first '$')
           } else {
-            size_t cl = s.find('$', i+1)-(i+1); 
+            size_t cl = s.find('$', i+1)-(i+1); // (inter) content len 
             l = s.substr(i, cl+2);
             sl = cl+2; // account for leading and trailing '$'
           } 
