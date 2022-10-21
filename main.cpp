@@ -14,7 +14,7 @@
 template<typename... T>
 std::string strf(T... t) {
   std::stringstream s;
-  ((s << t), ...);
+  ((s << t), ...); 
   return s.str();
 }
 
@@ -60,13 +60,6 @@ std::string sanitise(std::string s) {
     r.append(sanitise(c));
   }
   return r;
-}
-
-namespace __parse {
-  // some special characters mean different things in different contexts
-  // [TODO] 
-  // Finding an elegant way to account for 
-  // these is going to require some work
 }
 
 std::string parse(std::string s) {
@@ -150,8 +143,7 @@ std::string parse(std::string s) {
 }
 
 void generate(std::filesystem::path fp) {
-  std::string raw = read(fp.c_str());
-  std::string html("<!DOCTYPE html>\n<html>\n<head>"); 
+  std::string html, raw = read(fp.c_str()); 
   // == header == 
   // - read ':' pairs into a map
   // - return index of first line of content
@@ -173,20 +165,21 @@ void generate(std::filesystem::path fp) {
     if (j >= head.size()) break;
     i = j+1;
   }
-  // [TODO] apply meta data to html
-  html.append("\n</head>\n"); // finish head
+  // templating [TODO]
+
+  html.append(strf("<link rel=\"stylesheet\" type=\"text/css\" href=\"", DEFAULT_CSS, "\" />\n")); // apply default styling
+  for (const auto& [k, v]: header) {
+    for (const auto& e: v) {
+      html.append(strf(tag(k, e), '\n'));
+    }
+  } 
 
   // == body ==
   // loop over the entire file (from index provided above)
   // - translate (parse) markdown to html
-  // - apply default style
-  // - apply any qualifiying styles 
-  html.append(
-      strf(
-        tag("body", parse(raw.substr(head.size()+7))), // account for header denotion (index on 0)
-        "\n</html>"
-        )
-      );
+ 
+  html.append(tag("body", parse(raw.substr(head.size()+7)))); // account for header denotion (index on 0) 
+
   write(
       strf(
         OUT_DIR,
