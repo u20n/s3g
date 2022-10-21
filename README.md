@@ -1,6 +1,8 @@
-# Smol Static Site Generator (s3g)
+Smol Static Site Generator (s3g)
 ----
 Generates html based on [CommonMark standards](https://spec.commonmark.org/0.30).
+
+cloc: `181`
 
 ### Configuration
 The markdown files should have a meta-field tag at the top. This should be as follows;
