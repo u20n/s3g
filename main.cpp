@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <cstring>
+#include <cassert>
 
 #include "config.h"
 
@@ -17,11 +18,11 @@ std::string strf(T... t) {
   return s.str();
 }
 
-// produces a tagged string with signature of type
-// e.g. tag("p1", "a", 10, 0.5) => <p1>a100.5</p1>\n
+// produces a tagged string with signature of type, and optional arguments; e.g. href
 template<typename... T>
-std::string tag(const char* type, T... t) {
-  return std::string(strf("<",type,">",(t)...,"</",type,">\n"));
+std::string tag(std::string type, std::string content, std::string args="") {
+  if (!args.empty()) args = std::string(" "+args);
+  return std::string(strf("<",type,args,">",content,"</",type,">"));
 }
 
 std::string read(std::string fp) {
@@ -61,7 +62,14 @@ std::string sanitise(std::string s) {
   return r;
 }
 
-std::string translate(std::string s) {
+namespace __parse {
+  // some special characters mean different things in different contexts
+  // [TODO] 
+  // Finding an elegant way to account for 
+  // these is going to require some work
+}
+
+std::string parse(std::string s) {
   std::string r;
   for (unsigned int i=0; i<s.size(); i++) {
     const char c = s.at(i); 
@@ -81,10 +89,18 @@ std::string translate(std::string s) {
         if (s.at(i-1) == '\n') continue; // ignore double newlines
         r.append("\n<br>\n");
         break;
+      case '-': // possible hr
+      //case '*':
+      case '_':
+        if (s.at(i+2) == c) {
+          r.append("<hr />");
+          i+=2;
+        }
+        break;
       case '>': // block qoutes
         {
           size_t end = s.find("\n", i+2)-(i+2);
-          std::string inner = translate(s.substr(i+2, end)); // parse inter-qoute content
+          std::string inner = parse(s.substr(i+2, end)); // parse inter-qoute content
           r.append(tag("qoute", inner));
           i += end+1; // account for extra newline
         }
@@ -94,7 +110,7 @@ std::string translate(std::string s) {
           unsigned int h = s.find(' ', i)-i; // determine size of header
           unsigned int ii = i+h+1; // e.g. (#### abcdefg), would be index of 'a'
           std::string e = s.substr(ii, s.find("\n", ii)-ii); // content 
-          r.append(tag(strf("h",h).c_str(), e.c_str()));
+          r.append(tag(strf("h",h), e));
           i+=(h+e.size());
         }
         break;
@@ -106,17 +122,15 @@ std::string translate(std::string s) {
             size_t alias_len = s.find(']', i+1);
             if (s.at(alias_len-1) == '\\') alias_len = s.find(']', alias_len+1); // check for escaped brackets
             std::string alias = s.substr(i+1, alias_len-1-i); // (pos of bracket - size of bracket) - initial index
-            size_t url_len = s.find(')', alias_len);
-            std::string url = s.substr(alias_len+2, url_len-alias_len-2); // (pos of para - pos bracket) - size of para(s) 
+            std::string url = s.substr(alias_len+2, s.find(')', alias_len)-alias_len-2); // (pos of para - pos bracket) - size of para(s) 
             std::cout << sanitise(alias) << ':' << url << '\n'; // DEBUG
-            r.append(strf("<a href=", url, "\">", sanitise(alias), "</a>"));
+            r.append(tag("a", sanitise(alias), strf("href=\"", url, "\"")));
             i+=(alias.size()+url.size()+3); // content, [,],(,) => size is indexed on 1, so we only add 3
           }
         }
         break;
       case '*': // italic (or) bold
         {
-          // [TODO]: doesn't handle nested bold+italics
           const char* type; unsigned int ii;/**index*/ const char* mc; // match-case
           if (s.at(i+1) == '*') { // bold
             ii = i+2; type = "b"; mc = "**";
@@ -124,7 +138,7 @@ std::string translate(std::string s) {
             ii = i+1; type = "i"; mc = "*";
           }
           std::string e = s.substr(ii, s.find(mc, ii)-ii);
-          r.append(tag(type, e.c_str())); 
+          r.append(tag(type, parse(e))); 
           i+=((ii-i)*2+e.size());
         }
         break;
@@ -143,24 +157,32 @@ void generate(std::filesystem::path fp) {
   // - read ':' pairs into a map
   // - return index of first line of content
  
-  //[TODO] : fix
   std::string head = raw.substr(4, raw.find("---", 4)-5);
   std::map<std::string, std::vector<std::string>> header;
-  unsigned int i = 0; while(i < head.size()) { 
-    size_t j = head.find(':', i); if (j == std::string::npos) break; 
-    std::string k = head.substr(i, j-i); // account for space taken by colon
-    std::string v = head.substr(j+2, head.find('\n', j)-j+2);
-    //std::cout << k << ':' << v << '\n'; // DEBUG
-    i = (j+1)+(v.size()); // account for the space between the colon and the value, and for the newline character after the value (size is index'd on 1)
+  for (unsigned int i = 0; i<head.size();) {
+    size_t j = head.find('\n', i); 
+    std::string r = head.substr(i, j-i);
+    std::string k = r.substr(0, r.find(':'));
+    std::string v = r.substr(r.find(':')+2, r.size());
+    if (v.find(',') != std::string::npos) {
+      size_t ii = 0; while(ii+1 < v.size()) {
+        size_t e = (v.find(',', ii) != std::string::npos) ? v.find(',', ii) : v.size(); 
+        header[k].push_back(v.substr(ii, e-ii));
+        ii = e+2;
+      }
+    } else header[k] = {v}; 
+    if (j >= head.size()) break;
+    i = j+1;
   }
+
   // [TODO] apply meta data to html
 
   // == body ==
   // loop over the entire file (from index provided above)
-  // - translate markdown to html
+  // - translate (parse) markdown to html
   // - apply default style
   // - apply any qualifiying styles 
-  html.append(translate(raw.substr(head.size()-1)));
+  html.append(parse(raw.substr(head.size()-1)));
   write(
       strf(
         OUT_DIR,
