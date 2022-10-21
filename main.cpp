@@ -174,15 +174,20 @@ void generate(std::filesystem::path fp) {
     if (j >= head.size()) break;
     i = j+1;
   }
-
   // [TODO] apply meta data to html
+  html.append("\n</head>\n"); // finish head
 
   // == body ==
   // loop over the entire file (from index provided above)
   // - translate (parse) markdown to html
   // - apply default style
   // - apply any qualifiying styles 
-  html.append(parse(raw.substr(head.size()-1)));
+  html.append(
+      strf(
+        tag("body", parse(raw.substr(head.size()+7))), // account for header denotion (index on 0)
+        "\n</html>"
+        )
+      );
   write(
       strf(
         OUT_DIR,
