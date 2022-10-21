@@ -122,8 +122,7 @@ std::string parse(std::string s) {
             size_t alias_len = s.find(']', i+1);
             if (s.at(alias_len-1) == '\\') alias_len = s.find(']', alias_len+1); // check for escaped brackets
             std::string alias = s.substr(i+1, alias_len-1-i); // (pos of bracket - size of bracket) - initial index
-            std::string url = s.substr(alias_len+2, s.find(')', alias_len)-alias_len-2); // (pos of para - pos bracket) - size of para(s) 
-            std::cout << sanitise(alias) << ':' << url << '\n'; // DEBUG
+            std::string url = s.substr(alias_len+2, s.find(')', alias_len)-alias_len-2); // (pos of para - pos bracket) - size of para(s)  
             r.append(tag("a", sanitise(alias), strf("href=\"", url, "\"")));
             i+=(alias.size()+url.size()+3); // content, [,],(,) => size is indexed on 1, so we only add 3
           }
