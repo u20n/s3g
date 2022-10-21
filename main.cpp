@@ -75,7 +75,10 @@ std::string parse(std::string s) {
 
     // check for special characters
     switch (c) {
-      case '$': // mathjax (pain) TODO 
+      case '$': // mathjax (pain) TODO
+        if (s.at(i+1) == '$' && s.at(i+2) == '\n') {
+          
+        }
         break;
       case '\n': // newline
         if (s.at(i-1) == '\n') continue; // ignore double newlines
@@ -141,7 +144,7 @@ std::string parse(std::string s) {
 }
 
 void generate(std::filesystem::path fp) {
-  std::string html, raw = read(fp.c_str()); 
+  std::string html, raw = read(fp.string()); 
   // == header == 
   // - read ':' pairs into a map
   // - return index of first line of content
