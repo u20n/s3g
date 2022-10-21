@@ -1,6 +1,6 @@
 posts
 out
 css
-templates/*
+templates
 *.out
-.vscode/*
+.vscode
