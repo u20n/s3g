@@ -1,6 +1,6 @@
-posts/*
-css/*
+posts
+out
+css
 templates/*
 *.out
-out/*
 .vscode/*

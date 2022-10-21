@@ -165,8 +165,8 @@ void generate(std::filesystem::path fp) {
     if (j >= head.size()) break;
     i = j+1;
   }
-  // templating [TODO]
 
+  // templating [TODO]
   html.append(strf("<link rel=\"stylesheet\" type=\"text/css\" href=\"", DEFAULT_CSS, "\" />\n")); // apply default styling
   for (const auto& [k, v]: header) {
     for (const auto& e: v) {
