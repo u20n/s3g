@@ -24,7 +24,7 @@ These key:value pairs will be valid variables in templates. Prefix all variables
 | type |Post type to use in templating |
 
 #### Templates
-Templates should be in `./templates`. s3g will attempt to match the `type` header to a filename in `./templates` - e.g. `type: post` would link to `./templates/post.html`.
+Templates should be in `./templates`. s3g will attempt to match the `type` header to a filename in `./templates` - e.g. `type: post` would link to `./templates/post.html`. Should explict linking fail, or there is no explict `type`, s3g will use the `./templates/default.html` template.
 
 ### Features
 RoadMap:
