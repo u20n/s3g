@@ -1,7 +1,7 @@
-*posts
-*out
-*css
-*templates
-*assets
+/posts
+/out
+/css
+/templates
+/assets
 *.out
 .vscode
