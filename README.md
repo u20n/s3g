@@ -28,9 +28,9 @@ Templates should be in `./templates`. s3g will attempt to match the `type` heade
 
 ### Features
 RoadMap:
- - [ ] Conditional Templates
- - [ ] CSS
- - [ ] MathJax
+ - [x] Conditional Templates
+ - [x] CSS
+ - [x] MathJax
  - [ ] RSS
  - [ ] Atom
 

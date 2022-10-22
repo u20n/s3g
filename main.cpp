@@ -186,7 +186,7 @@ void generate(std::filesystem::path fp) {
     std::cout << variable << '\n'; // DEBUG
     
     std::string __temp;
-    temp.erase(i, variable.size()+2); // Doesn't erase a left over '$' TODO
+    temp.erase(i, variable.size()+2);
     if (variable == "text") { // body of text!
       __temp = parse(raw.substr(head.size()+7)); // account for header denotion (index'd on 0)
     } else {
