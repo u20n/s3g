@@ -6,7 +6,6 @@
 #include <vector>
 #include <map>
 #include <cstring>
-#include <cassert>
 
 #include "config.h"
 
@@ -93,7 +92,6 @@ std::string parse(std::string s) {
         r.append("\n<br>\n");
         break;
       case '-': // possible hr
-      //case '*':
       case '_':
         if (s.at(i+2) == c) {
           r.append("<hr />");
@@ -153,10 +151,7 @@ std::string parse(std::string s) {
 
 void generate(std::filesystem::path fp) {
   std::string raw = read(fp.string()); 
-  // == header == 
-  // - read ':' pairs into a map
-  // - return index of first line of content
- 
+  // == header ==  
   std::string head = raw.substr(4, raw.find("---", 4)-5);
   std::map<std::string, std::vector<std::string>> header;
   for (unsigned int i = 0; i<head.size();) {
@@ -175,11 +170,11 @@ void generate(std::filesystem::path fp) {
     i = j+1;
   }
 
-  // templating
+  // == templating ==
   std::string temp = (header.count("type")) ? read(strf("./templates/", header["type"].at(0), ".html")) : read("./templates/default.html"); // pull template
   for (unsigned int i=0; i<temp.size(); i++) {
     if (temp.at(i) != '$') continue;
-    // parse variables (assume correct template => header)
+    // parse variables (unhandled variables are ignored)
     std::string variable = temp.substr(i+1, temp.find('$', i+1)-(i+1));
     
     std::string __temp;
@@ -195,9 +190,6 @@ void generate(std::filesystem::path fp) {
     i += __temp.size();
   } 
 
-  // == body ==
-  // loop over the entire file (from index provided above)
-  // - translate (parse) markdown to html
   write(
       strf(
         OUT_DIR,
