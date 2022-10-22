@@ -7,7 +7,7 @@
 #include <map>
 #include <cstring>
 
-#include "config.h"
+#include "config.hpp"
 
 // assimilates **all** types into a string
 template<typename... T>
@@ -182,6 +182,12 @@ void generate(std::filesystem::path fp) {
     if (variable == "text") { // body of text!
       __temp = parse(raw.substr(head.size()+7)); // account for header denotion (index'd on 0)
     } else {
+      if (INDEXED.count(variable)) { // TODO
+        // check for existing index page
+        // - if not, create one
+        // push link to current file to index page
+        // ~ (Most of this depends on how we do variable expansion) TODO
+      }
       for (const auto& e: header[variable]) {
         __temp.append(strf(tag(variable, e)));
       }

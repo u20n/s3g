@@ -2,7 +2,7 @@ Smol Static Site Generator (s3g)
 ----
 Generates html based on [CommonMark standards](https://spec.commonmark.org/0.30).
 
-cloc: `195`
+> very fast, very smol. cloc: `197`
 
 ### Configuration
 The markdown files should have a meta-field tag at the top. This should be as follows;
@@ -22,6 +22,17 @@ These `key:value` pairs will be valid variables in templates. Prefix and end all
 | title|Page title                     | Path title to be displayed      |
 | type |Post type to use in templating | Valid template file stem        |
 
+#### Under Review
+**Modifiers**
+s3g uses modifiers to determine the way that values are displayed. These are prefixed the the variable in templates. The order of interpretation is as follows `A"S"$variable$`, where `A` is some modifier, `S` is some seperator, and `variable` is the variable to operate on.
+
+| Modifier | Behavior                                       |
+|----------|------------------------------------------------|
+| @        | lists all of the values, in order of apperance |
+| v        | lists values in descending order               |
+| ^        | lists values in ascending order                |
+#### [End] Under Review
+
 #### Templates
 Templates should be in `./templates`. s3g will attempt to match the `type` header to a filename in `./templates` - e.g. `type: post` would link to `./templates/post.html`. Should explict linking fail, or there is no explict `type`, s3g will use the `./templates/default.html` template.
 
@@ -32,5 +43,9 @@ RoadMap:
  - [x] MathJax
  - [ ] RSS
  - [ ] Atom
- - [ ] (Indexable) Tags
+ - [ ] (Indexable) Values
 
+### Usage
+`make recompile` to recompile
+
+`make` to rebuild site
