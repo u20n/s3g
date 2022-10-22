@@ -80,23 +80,18 @@ std::string parse(std::string s) {
           std::string l; size_t sl = 0; // latex, string len 
           if (s.at(i+1) == '$') {
             size_t cl = s.find("$$", i+3)-(i+3); // (inter) content len 
-            l = strf(
-                "$$",
-                s.substr(i+3, cl),
-                "$$"
-              );
+            r.append(strf("\\[",s.substr(i+3, cl), "\\]"));
             sl = cl+5; // account for beginning "$\n" and trailing "\n$$" (we only have to add five because i is the first '$')
           } else {
             size_t cl = s.find('$', i+1)-(i+1); // (inter) content len 
-            l = s.substr(i, cl+2);
-            sl = cl+2; // account for leading and trailing '$'
-          } 
-          r.append(tag("math", l));
+            r.append(strf("\\(", s.substr(i+1, cl), "\\)"));
+            sl = cl+1; // account for leading and trailing '$'
+          }
           i += sl;
         }
         break;
       case '\n': // newline
-        if (s.at(i-1) == '\n') continue; // ignore double newlines
+        if (I_DNL && s.at(i-1) == '\n') continue; // ignore double newlines
         r.append("\n<br>\n");
         break;
       case '-': // possible hr
@@ -159,7 +154,7 @@ std::string parse(std::string s) {
 }
 
 void generate(std::filesystem::path fp) {
-  std::string html, raw = read(fp.string()); 
+  std::string raw = read(fp.string()); 
   // == header == 
   // - read ':' pairs into a map
   // - return index of first line of content
@@ -182,27 +177,37 @@ void generate(std::filesystem::path fp) {
     i = j+1;
   }
 
-  // templating [TODO]
-  html.append(strf("<link rel=\"stylesheet\" type=\"text/css\" href=\"", DEFAULT_CSS, "\" />\n")); // apply default styling
-  for (const auto& [k, v]: header) {
-    for (const auto& e: v) {
-      html.append(strf(tag(k, e), '\n'));
+  // templating
+  std::string temp = (header.count("type")) ? read(strf("./templates/", header["type"].at(0), ".html")) : read("./templates/default.html"); // pull template
+  for (unsigned int i=0; i<temp.size(); i++) {
+    if (temp.at(i) != '$') continue;
+    // parse variables (assume correct template => header)
+    std::string variable = temp.substr(i+1, temp.find('$', i+1)-(i+1));
+    std::cout << variable << '\n'; // DEBUG
+    
+    std::string __temp;
+    temp.erase(i, variable.size()+2); // Doesn't erase a left over '$' TODO
+    if (variable == "text") { // body of text!
+      __temp = parse(raw.substr(head.size()+7)); // account for header denotion (index'd on 0)
+    } else {
+      for (const auto& e: header[variable]) {
+        __temp.append(strf(tag(variable, e), '\n'));
+      }
     }
+    temp.insert(i, __temp);
+    i += __temp.size();
   } 
 
   // == body ==
   // loop over the entire file (from index provided above)
   // - translate (parse) markdown to html
- 
-  html.append(tag("body", parse(raw.substr(head.size()+7)))); // account for header denotion (index on 0) 
-
   write(
       strf(
         OUT_DIR,
         "/", fp.stem().c_str(),
         ".html"
         ),
-      html
+      temp
     ); 
 }
 

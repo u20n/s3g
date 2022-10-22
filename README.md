@@ -2,7 +2,7 @@ Smol Static Site Generator (s3g)
 ----
 Generates html based on [CommonMark standards](https://spec.commonmark.org/0.30).
 
-cloc: `194`
+cloc: `199`
 
 ### Configuration
 The markdown files should have a meta-field tag at the top. This should be as follows;
@@ -19,7 +19,7 @@ These key:value pairs will be valid variables in templates. Prefix all variables
 **Reserved Key Types**
 | Key  | Information                   |
 |------|-------------------------------|
-|ptitle|Page title                     |
+| title|Page title                     |
 | icon |Favicon icon of the page       |
 | type |Post type to use in templating |
 
