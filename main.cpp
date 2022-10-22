@@ -33,9 +33,7 @@ std::string read(std::string fp) {
 }
 
 void /**over*/write(std::string fp, std::string c) {
-  std::ofstream f(fp);
-  f << c;
-  f.close();
+  std::ofstream f(fp); f << c; f.close();
 }
 
 // sanitise characters to html-safe
@@ -183,7 +181,6 @@ void generate(std::filesystem::path fp) {
     if (temp.at(i) != '$') continue;
     // parse variables (assume correct template => header)
     std::string variable = temp.substr(i+1, temp.find('$', i+1)-(i+1));
-    std::cout << variable << '\n'; // DEBUG
     
     std::string __temp;
     temp.erase(i, variable.size()+2);
@@ -191,7 +188,7 @@ void generate(std::filesystem::path fp) {
       __temp = parse(raw.substr(head.size()+7)); // account for header denotion (index'd on 0)
     } else {
       for (const auto& e: header[variable]) {
-        __temp.append(strf(tag(variable, e), '\n'));
+        __temp.append(strf(tag(variable, e)));
       }
     }
     temp.insert(i, __temp);
