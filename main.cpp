@@ -148,17 +148,26 @@ std::string parse(std::string s) {
   }
   return r;
 }
+std::map<
+  std::string, 
+  std::map<
+    std::string,
+    std::vector<std::string>
+  >
+> indexed; // items
 
 void generate(std::filesystem::path fp) {
   std::string raw = read(fp.string()); 
   // == header ==  
   std::string head = raw.substr(4, raw.find("---", 4)-5);
   std::map<std::string, std::vector<std::string>> header;
+  bool index = false;
   for (unsigned int i = 0; i<head.size();) {
     size_t j = head.find('\n', i); 
     std::string r = head.substr(i, j-i);
     std::string k = r.substr(0, r.find(':'));
     std::string v = r.substr(r.find(':')+2, r.size());
+    if (INDEXED.count(k)) index = true;
     if (v.find(',') != std::string::npos) {
       size_t ii = 0; while(ii+1 < v.size()) {
         size_t e = (v.find(',', ii) != std::string::npos) ? v.find(',', ii) : v.size(); 
@@ -169,9 +178,13 @@ void generate(std::filesystem::path fp) {
     if (j >= head.size()) break;
     i = j+1;
   }
-
+  if (index) indexed[strf(OUT_DIR, "/", fp.stem().string(), ".html")] = header; // index ourself
+  
   // == templating ==
-  std::string temp = (header.count("type")) ? read(strf("./templates/", header["type"].at(0), ".html")) : read("./templates/default.html"); // pull template
+  std::string temp = (header.count("type")) ? 
+    read(strf(TEMPLATE_DIR, header["type"].at(0), ".html")) : // pull given 
+    read(strf(TEMPLATE_DIR, "/default.html")); // pull default
+
   for (unsigned int i=0; i<temp.size(); i++) {
     if (temp.at(i) != '$') continue;
     // parse variables (unhandled variables are ignored)
@@ -182,12 +195,6 @@ void generate(std::filesystem::path fp) {
     if (variable == "text") { // body of text!
       __temp = parse(raw.substr(head.size()+7)); // account for header denotion (index'd on 0)
     } else {
-      if (INDEXED.count(variable)) { // TODO
-        // check for existing index page
-        // - if not, create one
-        // push link to current file to index page
-        // ~ (Most of this depends on how we do variable expansion) TODO
-      }
       for (const auto& e: header[variable]) {
         __temp.append(strf(tag(variable, e)));
       }
@@ -199,7 +206,7 @@ void generate(std::filesystem::path fp) {
   write(
       strf(
         OUT_DIR,
-        "/", fp.stem().c_str(),
+        "/", fp.stem().string(),
         ".html"
         ),
       temp

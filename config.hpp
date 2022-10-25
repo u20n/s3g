@@ -5,6 +5,7 @@
 
 std::string OUT_DIR = "./out";
 std::string IN_DIR = "./posts";
+std::string TEMPLATE_DIR = "./templates";
 
 bool I_DNL = false; // ignore double newlines
 
