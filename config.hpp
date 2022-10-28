@@ -12,7 +12,7 @@ bool I_DNL = false; // ignore double newlines
 std::unordered_set<std::string> INDEXED { // indexed meta-fields
   "tags",
   "status",
-  "published"
+  "published" 
 };
 
 #endif
