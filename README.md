@@ -9,6 +9,7 @@ RoadMap:
  - [x] Conditional Templates
  - [x] CSS
  - [x] MathJax
+ - [x] endnotes
  - [ ] RSS
  - [ ] Atom
  - [ ] (Indexable) Meta-Fields
@@ -56,7 +57,7 @@ would be built as
 ```html
 <ul>
   <li class="...-class">..., </li>
-  ... <!-- for however many variables under the same tag -->
+  <!-- for however many variables under the same tag -->
 </ul>
 ```
 
