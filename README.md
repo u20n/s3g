@@ -27,12 +27,11 @@ key: value
 ---
 ```
 
-These `key:value` pairs will be valid variables in templates. Prefix and end all variables with `$` - e.g. `$author$`. It is assumed that **all** values present in the header are a vector - you should do any textual formatting in the meta field, as s3g will insert all possible values for a key under its specifier. s3g will wrap the each occurance of the variable with a tag in the key's name - e.g. `type: value` would produce `<type>value</type>`. Most of the values are arbitrary, but there are some that are reserved;
+These `key:value` pairs will be valid variables in templates. Prefix and end all variables with `VAR_IND`. Key types are entirely arbitrary, but there are reserved keys:
 
 **Reserved Key Types**
 | Key   | Information                   | Content                         |
 |-------|-------------------------------|---------------------------------|
-| title |Page title                     | Path title to be displayed      |
 | type  |Post type to use in templating | Valid template file stem        |
 
 ---
