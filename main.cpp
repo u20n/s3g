@@ -41,9 +41,9 @@ std::string sanitise(char c) {
     case '&':
       return("&amp;");
     case '>':
-      return("&lt;");
-    case '<':
       return("&gt;");
+    case '<':
+      return("&lt;");
     default:
       std::string r; r+=c;
       return r;
@@ -72,7 +72,15 @@ std::string parse(std::string s) {
 
     // check for special characters
     switch (c) {
-      case '$':
+      case '`': // Code Block
+        {
+          size_t j = (s.at(i+2) == c) ? i+3 : i+1;
+          std::string code = s.substr(j, s.find(c, j)-j); 
+          r.append(tag("code", sanitise(code)));
+          i += code.size()+2;
+          break;
+        }
+      case '$': // LaTex
         {
           std::string l; size_t sl = 0; // latex, string len 
           if (s.at(i+1) == '$') {
@@ -96,8 +104,8 @@ std::string parse(std::string s) {
         if (s.at(i+2) == c) {
           r.append("<hr />");
           i+=2;
+          break;
         }
-        break;
       case '>': // block qoutes
         {
           size_t end = s.find("\n", i+2)-(i+2);
@@ -117,17 +125,20 @@ std::string parse(std::string s) {
         break;
       case '[': // link
         {
-          if (s.at(i+1) == '^') { // endnote [TODO]
+          size_t alias_len = s.find(']', i+1);
+          if (s.at(alias_len-1) == '\\') alias_len = s.find(']', alias_len+1); // check for escaped brackets
+ 
+          std::string alias = s.substr(i+1, alias_len-1-i); // (pos of bracket - size of bracket) - initial index
+          std::string link = s.substr(alias_len+2, s.find(')', alias_len)-alias_len-2); // (pos of para - pos bracket) - size of para(s)
+          std::string rurl; // relative/real url
 
-          } else { // url
-            size_t alias_len = s.find(']', i+1);
-            if (s.at(alias_len-1) == '\\') alias_len = s.find(']', alias_len+1); // check for escaped brackets
-            std::string alias = s.substr(i+1, alias_len-1-i); // (pos of bracket - size of bracket) - initial index
-            std::string url = s.substr(alias_len+2, s.find(')', alias_len)-alias_len-2); // (pos of para - pos bracket) - size of para(s)  
-            r.append(tag("a", sanitise(alias), strf("href=\"", url, "\"")));
-            i+=(alias.size()+url.size()+3); // content, [,],(,) => size is indexed on 1, so we only add 3
-          }
-        }
+          if (alias.at(0) == '^') { // referential endnote
+            alias.erase(0, 1); // sanitise
+            rurl = strf("id=\"", link, "\"");
+          } else rurl = strf("href=\"", link, "\""); // hyperlink 
+          r.append(tag("a", sanitise(alias), rurl));
+          i+=(alias.size()+link.size()+3); // content, [,],(,) => size is indexed on 1, so we only add 3
+        } 
         break;
       case '*': // italic (or) bold
         {
@@ -148,26 +159,19 @@ std::string parse(std::string s) {
   }
   return r;
 }
-std::map<
-  std::string, 
-  std::map<
-    std::string,
-    std::vector<std::string>
-  >
-> indexed; // items
 
 void generate(std::filesystem::path fp) {
   std::string raw = read(fp.string()); 
   // == header ==  
   std::string head = raw.substr(4, raw.find("---", 4)-5);
   std::map<std::string, std::vector<std::string>> header;
-  bool index = false;
-  for (unsigned int i = 0; i<head.size();) {
+
+  for (unsigned int i=0; i<head.size();) {
     size_t j = head.find('\n', i); 
     std::string r = head.substr(i, j-i);
     std::string k = r.substr(0, r.find(':'));
     std::string v = r.substr(r.find(':')+2, r.size());
-    if (INDEXED.count(k)) index = true;
+ 
     if (v.find(',') != std::string::npos) {
       size_t ii = 0; while(ii+1 < v.size()) {
         size_t e = (v.find(',', ii) != std::string::npos) ? v.find(',', ii) : v.size(); 
@@ -178,29 +182,47 @@ void generate(std::filesystem::path fp) {
     if (j >= head.size()) break;
     i = j+1;
   }
-  if (index) indexed[strf(OUT_DIR, "/", fp.stem().string(), ".html")] = header; // index ourself
-  
+ 
   // == templating ==
   std::string temp = (header.count("type")) ? 
     read(strf(TEMPLATE_DIR, header["type"].at(0), ".html")) : // pull given 
     read(strf(TEMPLATE_DIR, "/default.html")); // pull default
+ 
+  // == pull variable/scheme ==
+  auto __search = [](std::string src, char delim, unsigned int i=0) {
+    return src.substr(i+1, src.find(delim, i+1)-(i+1));
+  };
 
-  for (unsigned int i=0; i<temp.size(); i++) {
-    if (temp.at(i) != '$') continue;
-    // parse variables (unhandled variables are ignored)
-    std::string variable = temp.substr(i+1, temp.find('$', i+1)-(i+1));
-    
-    std::string __temp;
-    temp.erase(i, variable.size()+2);
-    if (variable == "text") { // body of text!
-      __temp = parse(raw.substr(head.size()+7)); // account for header denotion (index'd on 0)
-    } else {
-      for (const auto& e: header[variable]) {
-        __temp.append(strf(tag(variable, e)));
-      }
-    }
-    temp.insert(i, __temp);
-    i += __temp.size();
+  // == parse variables/schemes == 
+  for (unsigned int i=0; i<temp.size(); i++) { 
+    if (temp.at(i) == SCHEME_IND) { 
+      std::string scheme = __search(temp, SCHEME_IND, i); // pull scheme
+      std::string variable = __search(scheme, VAR_IND, scheme.find(VAR_IND)); // pull variable 
+      std::string __temp; 
+      for (unsigned int j=0; j<header[variable].size(); j++) { // replicate for each value in the field
+        std::string __scheme = scheme; // make an instance of the scheme 
+        for (unsigned int l=0; l<__scheme.size(); l++) { 
+          if (__scheme.at(l) == VAR_IND) {
+            std::string variable = __search(__scheme, VAR_IND, l);
+            __scheme.erase(l, variable.size()+2);
+            __scheme.insert(l, header[variable].at(j)); 
+            l += (variable.size()+2);
+          }
+        } 
+        __temp.append(strf(__scheme, '\n')); // push
+      } 
+      temp.erase(i, scheme.size()+2); // remove scheme
+      temp.insert(i, __temp); // insert completed scheme(s)
+      i += __temp.size(); // skip over completed scheme(s) 
+    } else if (temp.at(i) == VAR_IND) {
+      std::string variable = __search(temp, VAR_IND, i);
+      temp.erase(i, variable.size()+2); 
+      std::string __temp;
+      if (variable == "text") { // body of text!
+        __temp = parse(raw.substr(head.size()+7)); // account for header denotion (index'd on 0)
+      } else if (header.count(variable)) __temp = header[variable].at(0);
+      temp.insert(i, __temp); i += __temp.size();
+    } 
   } 
 
   write(
@@ -221,10 +243,15 @@ int main(void) {
       }
     ) { 
       if (e.path().extension() == ".md") {
-        generate(e.path());
-        std::cout << "built " << e.path().c_str() << '\n'; // DEBUG
+        std::cout << e.path().string(); // DEBUG
+        try {
+          generate(e.path());
+          std::cout << " -> built \n"; // DEBUG 
+        } catch (std::exception& e) {
+          std::cout << " -> failed\n"; // DEBUG
+          std::cout << e.what() << '\n'; // DEBUG
+        }
       }
     }
-
   return 0; 
 }

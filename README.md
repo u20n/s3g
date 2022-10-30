@@ -39,14 +39,16 @@ These `key:value` pairs will be valid variables in templates. Prefix and end all
 
 **Expanding Fields**
 
-In the event a field has more than one value: 
-  - s3g will tag each item as a list item with a class corresponding to its key - e.g. `<li class=key>...</li>`.
-  - The formatting of the variable will be treated as a scheme.
+Any multi-value fields need to have a scheme. Schemes are denoted by `SCHEME_IND`. The html inside of the scheme will be duplicated for each value in the field.
 
-e.g. 
+Caveats:
+- Items will be listed in the same order of appearance as the field.
+- There can be **only one** variable in each scheme.
+
+e.g. (with `SCHEME_IND` set to `#`)
 ```html
 <ul>
-  $variable$,
+  #<li class="$variable$-class">$variable$, </li>#
 </ul>
 ```
 
@@ -54,8 +56,8 @@ would be built as
 
 ```html
 <ul>
-  <li class="variable">...,</li>
-  <li class="variable">...</li>
+  <li class="...-class">..., </li>
+  ... <!-- for however many variables under the same tag -->
 </ul>
 ```
 
