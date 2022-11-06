@@ -80,18 +80,16 @@ std::string parse(std::string s) {
           break;
         }
       case '$': // LaTex
-        {
-          size_t sl = 0; // string len 
+        { 
           if (s.at(i+1) == '$') {
-            size_t cl = s.find("$$", i+3)-(i+3); // (inter) content len 
+            size_t cl = s.find("$$", i+3)-(i+4); // (inter) content len 
             r.append(strf("\\[",s.substr(i+3, cl), "\\]"));
-            sl = cl+5; // account for beginning "$\n" and trailing "\n$$" (we only have to add five because i is the first '$')
+            i += cl+5; // account for leading and trailing '$$' 
           } else {
             size_t cl = s.find('$', i+1)-(i+1); // (inter) content len 
             r.append(strf("\\(", s.substr(i+1, cl), "\\)"));
-            sl = cl+1; // account for leading and trailing '$'
+            i += cl+1; // account for leading and trailing '$'
           }
-          i += sl;
         }
         break;
       case '\n': // newline
