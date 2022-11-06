@@ -19,6 +19,8 @@ RoadMap:
 
 `make` to rebuild site
 
+You should use `$` and `$$` to denote LaTex; `\(` and `\[` are treated as escaped sequences.
+
 ### Configuration
 The markdown files should have a meta-field tag at the top. This should be as follows;
 

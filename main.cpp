@@ -99,6 +99,12 @@ std::string parse(std::string s) {
         r.append("\n<br>\n");
         break;
       case '-': // possible hr
+        if (s.at(i+1) == ' ') { // check for list [TODO]
+          // check if this is the first li
+          // - establish a ul
+          // regardless, push a li
+          break;
+        }
       case '_':
         if (s.at(i+2) == c) {
           r.append("<hr />");
@@ -115,14 +121,14 @@ std::string parse(std::string s) {
         break;
       case '#': // headers
         {
-          unsigned int h = s.find(' ', i)-i; // determine size of header
-          unsigned int ii = i+h+1; // e.g. (#### abcdefg), would be index of 'a'
-          std::string e = s.substr(ii, s.find("\n", ii)-ii); // content 
+          size_t h = s.find(' ', i)-i; // determine size of header
+          size_t c = i+h+1; // content index, e.g. (#### abcdefg), would be index of 'a'
+          std::string e = s.substr(c, s.find("\n", c)-c); // content 
           r.append(tag(strf("h",h), e));
           i+=(h+e.size());
         }
         break;
-      case '[': // link broken [TODO]
+      case '[': // links
         {
           size_t alias_len = s.find(']', i+1); 
           if (s.at(alias_len-1) == '\\') alias_len = s.find(']', alias_len+1); // check for escaped brackets
@@ -153,7 +159,8 @@ std::string parse(std::string s) {
         break;
       case '*': // italic (or) bold
         {
-          const char* type; unsigned int ii;/**index*/ const char* mc; // match-case
+          std::string type, mc; // b/i, match-case
+          unsigned int ii; // index
           if (s.at(i+1) == '*') { // bold
             ii = i+2; type = "b"; mc = "**";
           } else { // italic
