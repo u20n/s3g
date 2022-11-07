@@ -199,9 +199,9 @@ void generate(std::filesystem::path fp) {
     i = j+1;
   } 
 
-  // == templating ==
+  // == templating == 
   std::string temp = (header.count("type")) ? 
-    read(strf(TEMPLATE_DIR, header["type"].at(0), ".html")) : // pull given 
+    read(strf(TEMPLATE_DIR, "/", header["type"].at(0), ".html")) : // pull given 
     read(strf(TEMPLATE_DIR, "/default.html")); // pull default
   std::string build; // actual html
 
