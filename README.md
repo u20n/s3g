@@ -33,9 +33,10 @@ key: value
 These `key:value` pairs will be valid variables in templates. Prefix and end all variables with `VAR_IND`. Key types are entirely arbitrary, but there are reserved keys:
 
 **Reserved Key Types**
-| Key   | Information                   | Content                         |
-|-------|-------------------------------|---------------------------------|
-| type  |Post type to use in templating | Valid template file stem        |
+| Key   | Information                              | Content                  |
+|-------|------------------------------------------|--------------------------|
+| type  |Post type to use in templating            | Valid template file stem |
+| path  |(Optional) File path when item is tracked | N/A                      |
 
 ---
 
@@ -86,7 +87,7 @@ with `TRACKED_IND` set to `&`, `SCHEME_IND` to `#`, and `VAR_IND` to `$`;
 ```html
 ...
 <ul>
-&math&#<li>$heading$, pub: ##$date$#</li>&
+&math&#<li><a href=$path$>##$heading$</a>, pub: ##$date$#</li>&
 </ul>
 ```
 
