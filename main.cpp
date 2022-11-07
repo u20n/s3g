@@ -200,9 +200,10 @@ void generate(std::filesystem::path fp) {
   } 
 
   // == templating == 
-  std::string temp = (header.count("type")) ? 
-    read(strf(TEMPLATE_DIR, "/", header["type"].at(0), ".html")) : // pull given 
-    read(strf(TEMPLATE_DIR, "/default.html")); // pull default
+  std::string temp = read(strf(TEMPLATE_DIR, "/", (header.count("type")) ? 
+    header["type"].at(0) : // pull given 
+    "default" // pull default
+    , ".html"));
   std::string build; // actual html
 
   // == pull variable/scheme ==
