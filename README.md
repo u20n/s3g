@@ -12,7 +12,7 @@ RoadMap:
  - [x] endnotes
  - [ ] RSS
  - [ ] Atom
- - [ ] (Indexable) Meta-Fields
+ - [ ] Tracked Meta-Fields
 
 ### Usage
 `make recompile` to recompile
@@ -67,7 +67,28 @@ would be built as
 
 **Indexing Values**
 
-[TODO]
+Meta-Fields can be tracked; if a field is tracked, the item's path will be made avaliable to the site compiler for each value of the field. 
+
+e.g. with `tags` tracked
+item's `tags` field:
+```md
+...
+tags: math, space, theory, physics
+...
+```
+would track the file path of `item` for each of the `tags` values.
+
+Referencing tracked fields only adds an initial layer of abstraction, beyond that it's just like any other meta-field. Wrap your typical scheme with `<TRACKED_IND><tracked_value><TRACKED_IND><scheme><TRACKED_IND>`, anything within the second set of `TRACKED_IND` is scoped to an iteration of each tracked item.
+
+For example, to iterate over all items tagged with `tags: ... math ...`, and display their titles:
+
+with `TRACKED_IND` set to `&`, `SCHEME_IND` to `#`, and `VAR_IND` to `$`;
+```html
+...
+<ul>
+&math&#<li>$heading$, pub: ##$date$#</li>&
+</ul>
+```
 
 #### Templates
 s3g will attempt to match the `type` header to a filename in `TEMPLATE_DIR` - e.g. `type: post` would link to `TEMPLATE_DIR/post.html`. Should explict linking fail, or there is no explict `type`, s3g will use the `TEMPLATE_DIR/default.html` template.
