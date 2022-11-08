@@ -66,7 +66,7 @@ would be built as
 
 ---
 
-**Indexing Values**
+**Tracked Values**
 
 Meta-Fields can be tracked; if a field is tracked, the item's path will be made avaliable to the site compiler for each value of the field. 
 

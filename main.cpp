@@ -80,7 +80,7 @@ std::string parse(std::string s) {
           break;
         }
       case '$': // LaTex
-        { 
+        {
           if (s.at(i+1) == '$') {
             size_t cl = s.find("$$", i+3)-(i+4); // (inter) content len 
             r.append(strf("\\[",s.substr(i+3, cl), "\\]"));
@@ -157,16 +157,28 @@ std::string parse(std::string s) {
         break;
       case '*': // italic (or) bold
         {
-          std::string type, mc; // b/i, match-case
-          unsigned int ii; // index
-          if (s.at(i+1) == '*') { // bold
-            ii = i+2; type = "b"; mc = "**";
-          } else { // italic
-            ii = i+1; type = "i"; mc = "*";
-          }
-          std::string e = s.substr(ii, s.find(mc, ii)-ii);
-          r.append(tag(type, parse(e))); 
-          i+=((ii-i)*2+e.size());
+          // This is completely over-engineered, but it was bugging me
+          // we determine if this is a bold or italicised string
+          // - this is represented as `j` by the count of `*`.
+          // we can use this information to:
+          // - get the internal string [^a]
+          // - get the corresponding html type [^b]
+          // - move `i` ahead [^c]
+          std::string e, t; size_t j;
+          j = (s.at(i+1) == '*') ? 2 : 1;
+          e = s.substr(i+j, s.find(std::string(j, s.at(i)), i+j) - (i+j)); // [a]
+          r.append(
+              tag(
+                (j < 2) ? "i" : "b", // [b]
+                parse(
+                  s.substr(
+                    (i+j), 
+                    s.find(s.at(i)*j, i+j) - (i+j)
+                    )
+                  )
+                )
+              );
+          i += (j*2) + e.size() - 1; // [c]
         }
         break;
       default: 
