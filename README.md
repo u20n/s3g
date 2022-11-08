@@ -2,7 +2,7 @@ Smol Static Site Generator (s3g)
 ----
 Generates html based on [CommonMark standards](https://spec.commonmark.org/0.30).
 
-> very fast, very smol; cloc'ing in @ `247`
+> very fast, very smol; cloc'ing in @ `242`
 
 ### Features
 RoadMap:

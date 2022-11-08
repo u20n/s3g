@@ -164,20 +164,15 @@ std::string parse(std::string s) {
           // - get the internal string [^a]
           // - get the corresponding html type [^b]
           // - move `i` ahead [^c]
-          std::string e, t; size_t j;
+          std::string e; size_t j;
           j = (s.at(i+1) == '*') ? 2 : 1;
           e = s.substr(i+j, s.find(std::string(j, s.at(i)), i+j) - (i+j)); // [a]
           r.append(
               tag(
                 (j < 2) ? "i" : "b", // [b]
-                parse(
-                  s.substr(
-                    (i+j), 
-                    s.find(s.at(i)*j, i+j) - (i+j)
-                    )
-                  )
-                )
-              );
+                parse(e)
+              )
+            );
           i += (j*2) + e.size() - 1; // [c]
         }
         break;
