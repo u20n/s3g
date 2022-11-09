@@ -102,9 +102,12 @@ std::string parse(std::string s) {
         }
         break;
       case '\n': // newline
-        if (!I_DNL && s.at(i-1) == '\n') { r.append("\n<br>\n"); break; }
+        if (I_DNL && s.at(i-1) == '\n') continue;        
+        r.append("\n<br>\n"); 
+        break; 
       case '-': // [TODO] lists
         if (s.at(i+1) == ' ') { // list?
+          break;
         } // else: this is (possibly) a hr
       case '_':
         if (s.at(i+2) == c) {
@@ -132,8 +135,7 @@ std::string parse(std::string s) {
       case '[': // links
         {
           size_t alias_len = s.find(']', i+1); 
-          if (s.at(alias_len-1) == '\\') alias_len = s.find(']', alias_len+1); // check for escaped brackets
- 
+          if (s.at(alias_len-1) == '\\') alias_len = s.find(']', alias_len+1); // check for escaped brackets 
           std::string alias = s.substr(i+1, alias_len-1-i); // (pos of bracket - size of bracket) - initial index
           std::string rurl; // relative/real url
 
@@ -274,6 +276,7 @@ int main(void) {
         } catch (std::exception& e) {
           std::cout << " -> failed\n"; // DEBUG
           std::cout << e.what() << '\n'; // DEBUG
+          std::cout << std::string(10, '-') << '\n'; // DEBUG
         }
       }
     }
