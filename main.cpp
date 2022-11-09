@@ -81,32 +81,35 @@ std::string parse(std::string s) {
         }
       case '$': // LaTex
         {
-          if (s.at(i+1) == '$') {
-            size_t cl = s.find("$$", i+3)-(i+4); // (inter) content len 
-            r.append(strf("\\[",s.substr(i+3, cl), "\\]"));
-            i += cl+5; // account for leading and trailing '$$' 
-          } else {
-            size_t cl = s.find('$', i+1)-(i+1); // (inter) content len 
-            r.append(strf("\\(", s.substr(i+1, cl), "\\)"));
-            i += cl+1; // account for leading and trailing '$'
-          }
+          // (this is similar to our b/i parsing)
+          // we determine if this is a multi or single line [^a]
+          // - this is represented as `j` by the count of `$`
+          // we can use this information to:
+          // - get the internal string [^b]
+          // - get the corresponding LaTex indicator [^c]
+          // - move `i` ahead [^d]
+          std::string e; size_t j;
+          j = (s.at(i+1) == '$') ? 2 : 1; // [a]
+          e = s.substr(i+j, s.find(std::string(j, s.at(i)), i+j) - (i+j)); // [b]
+          r.append(
+              strf(
+                (j < 2) ? "\\(" : "\\[", // [c]
+                e,
+                (j < 2) ? "\\)" : "\\]" // [c]
+                )
+            );
+          i += (j*2) + e.size() - 1; // [d]
         }
         break;
       case '\n': // newline
-        if (I_DNL && s.at(i-1) == '\n') continue; // ignore double newlines
-        r.append("\n<br>\n");
-        break;
-      case '-': // possible hr
-        if (s.at(i+1) == ' ') { // check for list [TODO]
-          // check if this is the first li
-          // - establish a ul
-          // regardless, push a li
-          break;
-        }
+        if (!I_DNL && s.at(i-1) == '\n') { r.append("\n<br>\n"); break; }
+      case '-': // [TODO] lists
+        if (s.at(i+1) == ' ') { // list?
+        } // else: this is (possibly) a hr
       case '_':
         if (s.at(i+2) == c) {
           r.append("<hr />");
-          i+=2;
+          i += 2;
           break;
         } continue;
       case '>': // block qoutes
@@ -114,7 +117,7 @@ std::string parse(std::string s) {
           size_t end = s.find("\n", i+2)-(i+2);
           std::string inner = parse(s.substr(i+2, end)); // parse inter-qoute content
           r.append(tag("qoute", inner));
-          i += end+1; // account for extra newline
+          i += (end + 1); // account for extra newline
         }
         break;
       case '#': // headers
@@ -123,7 +126,7 @@ std::string parse(std::string s) {
           size_t c = i+h+1; // content index, e.g. (#### abcdefg), would be index of 'a'
           std::string e = s.substr(c, s.find("\n", c)-c); // content 
           r.append(tag(strf("h",h), e));
-          i+=(h+e.size());
+          i += (h+e.size());
         }
         break;
       case '[': // links
@@ -159,21 +162,21 @@ std::string parse(std::string s) {
         {
           // This is completely over-engineered, but it was bugging me
           // we determine if this is a bold or italicised string
-          // - this is represented as `j` by the count of `*`.
+          // - this is represented as `j` by the count of `*` [^a]
           // we can use this information to:
-          // - get the internal string [^a]
-          // - get the corresponding html type [^b]
-          // - move `i` ahead [^c]
+          // - get the internal string [^b]
+          // - get the corresponding html type [^c]
+          // - move `i` ahead [^d]
           std::string e; size_t j;
-          j = (s.at(i+1) == '*') ? 2 : 1;
-          e = s.substr(i+j, s.find(std::string(j, s.at(i)), i+j) - (i+j)); // [a]
+          j = (s.at(i+1) == '*') ? 2 : 1; // [a]
+          e = s.substr(i+j, s.find(std::string(j, s.at(i)), i+j) - (i+j)); // [b]
           r.append(
               tag(
-                (j < 2) ? "i" : "b", // [b]
-                parse(e)
+                (j < 2) ? "i" : "b", // [c]
+                parse(e) // enabled nested b/i/*
               )
             );
-          i += (j*2) + e.size() - 1; // [c]
+          i += (j*2) + e.size() - 1; // [d]
         }
         break;
       default: 
