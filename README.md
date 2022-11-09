@@ -10,9 +10,11 @@ RoadMap:
  - [x] CSS
  - [x] MathJax
  - [x] endnotes
- - [ ] RSS (!)
- - [ ] Atom (!)
+ - [!] RSS\*
+ - [!] Atom\*
  - [ ] Tracked Meta-Fields
+
+\*: It's out of the scope of s3g to handle RSS/Atom natively; you're better off using an html -> RSS/Atom generator.
 
 ### Usage
 `make recompile` to recompile
