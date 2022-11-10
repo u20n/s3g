@@ -12,7 +12,7 @@ RoadMap:
  - [x] \*notes (end, foot, side, etc.) 
  - [ ] Tracked Meta-Fields
 
-RSS/Atom: It's out of the scope of s3g to handle RSS/Atom natively; you're better off using an html -> RSS/Atom generator.
+RSS/Atom: It's out of the scope of s3g to handle RSS/Atom natively; you're better off using an html $\to$ RSS/Atom generator.
 
 ### Usage
 `make recompile` to recompile
