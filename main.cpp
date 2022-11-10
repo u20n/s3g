@@ -73,10 +73,10 @@ std::string parse(std::string s) {
     switch (c) {
       case '`': // Code Block
         {
-          size_t j = (s.at(i+2) == c) ? i+3 : i+1;
-          std::string code = s.substr(j, s.find(c, j)-j); 
+          size_t j = (s.at(i+2) == c) ? 3 : 1;
+          std::string code = s.substr(i+j, s.find(c, (i+j))-(i+j)); 
           r.append(tag("code", sanitise(code)));
-          i += code.size()+2;
+          i += code.size() + (j*2) - 1;
           break;
         }
       case '$': // LaTex
