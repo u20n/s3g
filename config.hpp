@@ -10,9 +10,11 @@ std::string TEMPLATE_DIR = "./templates";
 char VAR_IND = '$';
 char SCHEME_IND = '#';
 
-bool I_DNL = false; // ignore double newlines
+// ignore double new lines
+bool I_DNL = false;
 
-std::unordered_set<std::string> INDEXED { // indexed meta-fields
+// indexed meta-fields
+std::unordered_set<std::string> INDEXED {
   "tags",
   "status",
   "published" 

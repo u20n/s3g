@@ -133,29 +133,27 @@ std::string parse(std::string s) {
         }
         break;
       case '[': // links
-        {
-          size_t alias_len = s.find(']', i+1); 
+        { 
+          size_t alias_len = s.find(']', i+1);
           if (s.at(alias_len-1) == '\\') alias_len = s.find(']', alias_len+1); // check for escaped brackets 
-          std::string alias = s.substr(i+1, alias_len-1-i); // (pos of bracket - size of bracket) - initial index
-          std::string rurl; // relative/real url
-
-          if (alias.at(0) == '^') { // referential endnote
-            alias.erase(0, 1); // sanitise
+  
+          if (s.at(i+1) == '^') { // referential endnote
+            std::string rurl, alias = s.substr(i+2, (alias_len - 2) - i); // (pos of bracket - size of bracket) - initial index 
             if (
-                s.size() > (i+alias.size()+3) // don't overdraw
-                && s.at(i + alias.size() + 3) == ':' // check for source
-              ) { // source
+                s.at(alias_len + 1) == ':' // check for source
+              ) { // source 
               rurl = strf("id=\"", alias, "\"");
-              i += alias.size()+3; // account for ] and :
+              i = alias_len+1; // account for ':'
             } else { // reference
               rurl = strf("href=\"#", alias, "\""); // link to source
-              i += alias.size()+2; // account for ]
+              i = alias_len;
             }
             r.append(tag("sup", tag("a", sanitise(alias), rurl)));
           } else {
+            std::string alias = s.substr(i+1, (alias_len - 1) - i);
             std::string link = s.substr(alias_len+2, s.find(')', alias_len)-alias_len-2); // (pos of para - pos bracket) - size of para(s)
-            rurl = strf("href=\"", link, "\""); // hyperlink 
-            i += (alias.size() + link.size()+3); // update (account for [,],(,) )
+            std::string rurl = strf("href=\"", link, "\""); // hyperlink 
+            i = (alias_len + link.size()+2); // account for '(' and ')'
             r.append(tag("a", sanitise(alias), rurl));
           }
         } 
