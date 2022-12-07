@@ -108,10 +108,6 @@ std::string parse(std::string s) {
       case '-': // [TODO] lists
         if (s.at(i+1) == ' ') { // list?
           break;
-        } else if (s.at(i+2) == '-') { // hr
-          r.append("\n<hr>\n");
-          i += 2;
-          break;
         }
       case '_':
         if (s.at(i+2) == c) {
