@@ -7,7 +7,7 @@
 #include <map>
 #include <cstring>
 
-#include "config.hpp"
+#include "config.h"
 
 // assimilates **all** types into a string
 template<typename... T>

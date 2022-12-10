@@ -10,7 +10,10 @@ RoadMap:
  - [x] CSS
  - [x] MathJax
  - [x] \*notes (end, foot, side, etc.) 
- - [ ] Tracked Meta-Fields
+
+**Non-Features**
+
+Tracked Meta-Fields: While the templating does seem to promote tracking fields, its introduction would compromise the 'smol' nature of s3g by introducing partial templates, and the process of tracking on its own. While alternatives don't exist (yet), it is possible to replicate functionality through clever file and page structuring and some links.
 
 RSS/Atom: It's out of the scope of s3g to handle RSS/Atom natively; you're better off using an html $\to$ RSS/Atom generator.
 
@@ -36,9 +39,11 @@ These `key:value` pairs will be valid variables in templates. Prefix and end all
 | Key   | Information                              | Content                  |
 |-------|------------------------------------------|--------------------------|
 | type  |Post type to use in templating            | Valid template file stem |
-| path  |(Optional) File path when item is tracked | N/A                      |
 
 ---
+
+#### Templates
+s3g will attempt to match the `type` header to a filename in `TEMPLATE_DIR` - e.g. `type: post` would link to `TEMPLATE_DIR/post.html`. Should explict linking fail, or there is no explict `type`, s3g will use the `TEMPLATE_DIR/default.html` template.
 
 **Expanding Fields**
 
@@ -63,33 +68,3 @@ would be built as
   <!-- for however many variables under the same tag -->
 </ul>
 ```
-
----
-
-**Tracked Values**
-
-Meta-Fields can be tracked; if a field is tracked, the item's path will be made avaliable to the site compiler for each value of the field. 
-
-e.g. with `tags` tracked
-item's `tags` field:
-```md
-...
-tags: math, space, theory, physics
-...
-```
-would track the file path of `item` for each of the `tags` values.
-
-Referencing tracked fields only adds an initial layer of abstraction, beyond that it's just like any other meta-field. Wrap your typical scheme with `<TRACKED_IND><tracked_value><TRACKED_IND><scheme><TRACKED_IND>`, anything within the second set of `TRACKED_IND` is scoped to an iteration of each tracked item.
-
-For example, to iterate over all items tagged with `tags: ... math ...`, and display their titles:
-
-with `TRACKED_IND` set to `&`, `SCHEME_IND` to `#`, and `VAR_IND` to `$`;
-```html
-...
-<ul>
-&math&#<li><a href=$path$>##$heading$</a>, pub: ##$date$#</li>&
-</ul>
-```
-
-#### Templates
-s3g will attempt to match the `type` header to a filename in `TEMPLATE_DIR` - e.g. `type: post` would link to `TEMPLATE_DIR/post.html`. Should explict linking fail, or there is no explict `type`, s3g will use the `TEMPLATE_DIR/default.html` template.

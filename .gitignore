@@ -4,4 +4,4 @@
 /templates
 /assets
 *.out
-.vscode
+config.h
