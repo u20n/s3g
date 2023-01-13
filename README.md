@@ -1,30 +1,15 @@
 Smol Static Site Generator (s3g)
 ----
-Generates html based on [CommonMark standards](https://spec.commonmark.org/0.30).
 
-> very fast, very smol; cloc'ing in @ < 300
-
-### Features
-RoadMap:
- - [x] Conditional Templates
- - [x] CSS
- - [x] MathJax
- - [x] \*notes (end, foot, side, etc.) 
-
-**Non-Features**
-
-Tracked Meta-Fields: While the templating does seem to promote tracking fields, its introduction would compromise the 'smol' nature of s3g by introducing partial templates, and the process of tracking on its own. While alternatives don't exist (yet), it is possible to replicate functionality through clever file and page structuring and some links.
-
-RSS/Atom: It's out of the scope of s3g to handle RSS/Atom natively; you're better off using an html $\to$ RSS/Atom generator.
+s3g is a script which generates static sites.
 
 ### Usage
-`make recompile` to recompile
 
-`make` to rebuild site
+sfi uses an arbitrary markdown translator (e.g. [m2h](https://github.com/u20n/m2h) to compose its pages.
 
-You should use `$` and `$$` to denote LaTex; `\(` and `\[` are treated as escaped sequences.
+refer to s3g's man page (`make man`) for specific usage details.
 
-### Configuration
+### File Configuration
 The markdown files should have a meta-field tag at the top. This should be as follows;
 
 ```md
@@ -33,7 +18,7 @@ key: value
 ---
 ```
 
-These `key:value` pairs will be valid variables in templates. Prefix and end all variables with `VAR_IND`. Key types are entirely arbitrary, but there are reserved keys:
+These `key: value` pairs will be valid variables in templates. Key types are entirely arbitrary, but there are reserved keys:
 
 **Reserved Key Types**
 | Key   | Information                              | Content                  |
@@ -42,29 +27,54 @@ These `key:value` pairs will be valid variables in templates. Prefix and end all
 
 ---
 
-#### Templates
+### Templates
 s3g will attempt to match the `type` header to a filename in `TEMPLATE_DIR` - e.g. `type: post` would link to `TEMPLATE_DIR/post.html`. Should explict linking fail, or there is no explict `type`, s3g will use the `TEMPLATE_DIR/default.html` template.
 
-**Expanding Fields**
+### Meta-Field Patterns
 
-Any multi-value fields need to have a scheme. Schemes are denoted by `SCHEME_IND`. The html inside of the scheme will be duplicated for each value in the field.
+Patterns are designated by their scope; Global and Local. Local is straightfoward; it is scoped to a given page's meta-field. Global refers to multiples; it is refered to as Global because it is often used within the context of multiple meta-fields, but it can also be used to signify a multiple within an otherwise local context; see Example #3 below.
 
-Caveats:
-- Items will be listed in the same order of appearance as the field.
-- There can be **only one** variable in each scheme.
+| Indicator          | Type         |
+|--------------------|--------------|
+| `@key:value`       | Global Scope |
+| `#`                | Local Scope  |
+| `$`                | Variable     |
 
-e.g. (with `SCHEME_IND` set to `#`)
-```html
+Patterns generally take the following forms:
+
+1. A simple local.
+```
 <ul>
-  #<li class="$variable$-class">$variable$, </li>#
+  #
+  <li class="title">$title$</li>
+  <li class="date">$date$</li>
+  #
 </ul>
 ```
 
-would be built as
-
-```html
+2.a A tag page for physics posts.
+```
 <ul>
-  <li class="...-class">..., </li>
-  <!-- for however many variables under the same tag -->
+  @tag:physics#
+  <li class="title">$title$</li>
+  @#
+</ul>
+```
+
+2.b A tag page for all tags.
+```
+<ul>
+  @tag:#
+  <li class="title">$title$ - $tag$</li>
+  @#
+</ul>
+```
+
+3. A local scoped multiple which lists a page's tags; requires non-`-i` usage. 
+```
+<ul>
+  @tag:#
+  <li class="tag">$tag$</li>
+  #@
 </ul>
 ```
