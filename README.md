@@ -5,7 +5,7 @@ s3g is a script which generates static sites.
 
 ### Usage
 
-sfi uses an arbitrary markdown translator (e.g. [m2h](https://github.com/u20n/m2h) to compose its pages.
+sfi uses an arbitrary markdown translator (e.g. [m2h](https://github.com/u20n/m2h)) to compose its pages.
 
 refer to s3g's man page (`make man`) for specific usage details.
 
@@ -42,7 +42,7 @@ Patterns are designated by their scope; Global and Local. Local is straightfowar
 
 Patterns generally take the following forms:
 
-1. A simple local.
+\1. A simple local.
 ```
 <ul>
   #
