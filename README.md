@@ -25,7 +25,6 @@ These `key: value` pairs will be valid variables in templates. Key types are ent
 |-------|------------------------------------------|--------------------------|
 | type  |Post type to use in templating            | Valid template file stem |
 
----
 
 ### Templates
 s3g will attempt to match the `type` header to a filename in `TEMPLATE_DIR` - e.g. `type: post` would link to `TEMPLATE_DIR/post.html`. Should explict linking fail, or there is no explict `type`, s3g will use the `TEMPLATE_DIR/default.html` template.
@@ -42,7 +41,7 @@ Patterns are designated by their scope; Global and Local. Local is straightfowar
 
 Patterns generally take the following forms:
 
-\1. A simple local.
+1. A simple local.
 ```
 <ul>
   #
