@@ -1,4 +1,4 @@
-% s3g(1) s3g 2.0.1
+% s3g(1) s3g 2.1.1
 % uton
 % 2023
 
@@ -6,11 +6,9 @@
 s3g - smol static site generator
 
 # SYNOPSIS
-**s3g** \[-s\] \[-c CACHE\_FILE \[-i\]\] \[-t TEMPLATE\_FOLDER\] filename
+**s3g** -x \[-c CACHE\_FILE\]
 
-**s3g** -x \[-c CACHE\_FILE\] filename 
-
-**s3g** -p \[-c CACHE\_FILE \[-i\]\] \[-t TEMPLATE\_FOLDER\]
+**s3g** -a \[-s\] \[-c CACHE\_FILE \[-i\]\] \[-t TEMPLATE\_FOLDER\]
 
 **s3g** -v
 
@@ -19,8 +17,8 @@ s3g - smol static site generator
 
 # OPTIONS
 
--p
-: Piped mode. **s3g** takes its parsed html from `stdin`.
+-a
+: Apply templates. **s3g** takes its parsed html from `stdin`.
 
 -x
 : Extract meta-field. **s3g** takes the file, parses and (optionally) caches the header, and then pushes the body of the file to `stdout`.
