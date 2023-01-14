@@ -6,14 +6,14 @@
 s3g - smol static site generator
 
 # SYNOPSIS
-**s3g** -x \[-c CACHE\_FILE\]
+**s3g** -x -c CACHE\_FILE
 
-**s3g** -a \[-s\] \[-c CACHE\_FILE \[-i\]\] \[-t TEMPLATE\_FOLDER\]
+**s3g** -a \[-s\] -c CACHE\_FILE \[-i COMPOSITE\_CACHE\_FILE\] -t TEMPLATE\_FOLDER
 
 **s3g** -v
 
 # DESCRIPTION
-**s3g** compiles either standalone or index html files from markdown, css, and template files. **s3g** outputs the compiled html file to stdout. Running **s3g** without any arguments results in **s3g** printing this man page and its version, then exiting.
+**s3g** compiles either standalone or index html files from markdown and template files. **s3g** outputs the compiled html file to stdout. Running **s3g** without any arguments results in **s3g** printing this man page and its version, then exiting.
 
 # OPTIONS
 
@@ -21,22 +21,22 @@ s3g - smol static site generator
 : Apply templates. **s3g** takes its parsed html from `stdin`.
 
 -x
-: Extract meta-field. **s3g** takes the file, parses and (optionally) caches the header, and then pushes the body of the file to `stdout`.
+: Extract meta-field. **s3g** takes the file, parses and caches the header, and then pushes the body of the file to `stdout`.
 
-**-v**
-: Displays version.
+**-i** COMPOSITE\_CACHE\_FILE
+: Sets to index mode. Requires a composite cache file of all files to be indexed.
 
 -s
-: Silently ignore missing arguments. This applies to variables referenced in templates which have no value in a file's meta-field.
-
-**-i**
-: Sets to index mode. Requires **-c** to be set to a valid cache file.
+: Silently ignore missing variables. This applies to variables referenced in templates which have no value in a file's meta-field.
 
 **-c CACHE_FILE**
-: Provides a cache file for both page(default) and index(**-i**) mode. Not providing this will result in un-indexable pages.
+: Sets the cache file. 
 
 **-t TEMPLATE_FOLDER**
 : Sets the template folder.
+
+**-v**
+: Displays version.
 
 # EXIT VALUES
 **0**
