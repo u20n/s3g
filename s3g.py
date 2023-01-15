@@ -1,12 +1,11 @@
 import sys
 import getopt
 
-version = "2.0.1"
-
 # pull args
 try:  
-    opts, args = getopt.getopt(sys.argv[1:], "t:c:i:xavs") 
+    opts, args = getopt.getopt(sys.argv[1:], "t:c:i:xas") 
 except:
+    print("Invalid Argument")
     exit(1)
 
 # cmd args
@@ -16,24 +15,6 @@ composite_cache_file = ""
 ignore_missing = False
 index_mode = False
 file_content = "".join(sys.stdin.readlines())
-
-# QoL Read
-def read(path):
-    c = ""
-    with open(path) as f:
-        c = f.read()
-    return c
-
-# parse header 
-def parse_meta(meta_str):
-    meta_field = {}
-    meta_str = meta_str[0:( len(meta_field)-4 )] # strip trailing '---\n'
-    while meta_str:
-        key = meta_str[0:( meta_str.find(": ") )]
-        value = meta_str[( len(key)+2 ):( meta_str.find("\n") )]        
-        meta_field[key] = value
-        meta_str = meta_str[( len(key) + 2 + len(value) + 1 ):] # on to the next kp 
-    return meta_field 
 
 def extract():
     global file_content
@@ -49,13 +30,23 @@ def extract():
     print(file_content)
     
 def apply():
-    # FIXME: this should be reduced
-    global template_dir
-    global cache_file
-    global composite_cache_file
-    global ignore_missing
-    global index_mode
-    global file_content
+    # parse header 
+    def parse_meta(meta_str):
+        meta_field = {}
+        meta_str = meta_str[0:( len(meta_field)-4 )] # strip trailing '---\n'
+        while meta_str:
+            key = meta_str[0:( meta_str.find(": ") )]
+            value = meta_str[( len(key)+2 ):( meta_str.find("\n") )]        
+            meta_field[key] = value
+            meta_str = meta_str[( len(key) + 2 + len(value) + 1 ):] # on to the next kp 
+        return meta_field 
+
+    # QoL Read
+    def read(path):
+        c = ""
+        with open(path) as f:
+            c = f.read()
+        return c
 
     # context
     context = [{}] # it's assumed that context[0] is the own page's context
@@ -124,10 +115,6 @@ def apply():
 
     print(html) 
 
-def print_version():
-    print("s3g version %s" % version)
-    exit(0)
-
 mode = None # extract or apply
 
 for opt, arg in opts: 
@@ -138,9 +125,7 @@ for opt, arg in opts:
         composite_cache_file = arg
         index_mode = True
     elif opt == '-c':
-        cache_file = arg 
-    elif opt == '-v':
-        print_version()
+        cache_file = arg  
     elif opt == '-s':
         ignore_missing = True
     elif opt == '-x':

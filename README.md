@@ -14,7 +14,7 @@ The markdown files should have a meta-field tag at the top. This should be as fo
 
 ```md
 ---
-key:value
+key: value
 ---
 ```
 > *notice the spacing between key and value*

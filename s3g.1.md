@@ -1,4 +1,4 @@
-% s3g(1) s3g 2.1.1
+% s3g(1)
 % uton
 % 2023
 
@@ -9,8 +9,6 @@ s3g - smol static site generator
 **s3g** -x -c CACHE\_FILE
 
 **s3g** -a \[-s\] -c CACHE\_FILE \[-i COMPOSITE\_CACHE\_FILE\] -t TEMPLATE\_FOLDER
-
-**s3g** -v
 
 # DESCRIPTION
 **s3g** compiles either standalone or index html files from markdown and template files. **s3g** outputs the compiled html file to stdout. Running **s3g** without any arguments results in **s3g** printing this man page and its version, then exiting.
@@ -34,9 +32,6 @@ s3g - smol static site generator
 
 **-t TEMPLATE_FOLDER**
 : Sets the template folder.
-
-**-v**
-: Displays version.
 
 # EXIT VALUES
 **0**
