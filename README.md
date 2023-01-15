@@ -39,6 +39,7 @@ Patterns are designated by their scope; Multiple and Local. Local is straightfow
 | `@key:value`       | Multiple Scope |
 | `#`                | Local Scope    |
 | `$`                | Variable       |
+| `%`                | Body of Text   |
 
 Patterns generally take the following forms:
 

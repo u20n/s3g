@@ -26,9 +26,9 @@ def extract():
     f = open(cache_file, 'w') 
     f.write(meta_str)
     f.close()
- 
-    print(file_content)
     
+    print(file_content)
+
 def apply():
     # parse header 
     def parse_meta(meta_str):
@@ -51,8 +51,7 @@ def apply():
     # context
     context = [{}] # it's assumed that context[0] is the own page's context
     # read from own cache-file
-    context[0] = parse_meta(read(cache_file)) 
-    context[0]["text"] = file_content
+    context[0] = parse_meta(read(cache_file))  
 
     if index_mode:
         composite = read(composite_cache_file) 
@@ -74,7 +73,7 @@ def apply():
         while scheme.count('$'):
             index = scheme.index('$')+1
             key = scheme[index:scheme.find('$', index)]
-
+            
             value = ""
             try:
                 value = context[key]
@@ -109,6 +108,9 @@ def apply():
             html += local_parse(context[0], template[i+1:end_of_scheme]) 
 
             i = ( end_of_scheme + 1 )
+        elif template[i] == '%':
+            html += file_content
+            i += 1
         else:
             html += template[i]
             i += 1
