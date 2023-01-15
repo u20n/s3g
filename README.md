@@ -59,7 +59,7 @@ Patterns generally take the following forms:
 <ul>
   @tag:physics#
   <li class="title">$title$</li>
-  #@
+  #
 </ul>
 ```
 
@@ -68,7 +68,7 @@ Patterns generally take the following forms:
 <ul>
   @tag:#
   <li class="title">$title$ - $tag$</li>
-  #@
+  #
 </ul>
 ```
 
@@ -77,6 +77,6 @@ Patterns generally take the following forms:
 <ul>
   @tag:#
   <li class="tag">$tag$</li>
-  #@
+  #
 </ul>
 ```

@@ -90,19 +90,20 @@ def apply():
     while i < len(template):
         if template[i] == '@': 
             scheme_begin = template.find('#', i)
-        
+            scheme_end = template.find('#', scheme_begin+1)
+            
             colon = template.find(':', i)
             key = template[i+1:colon]
             value = template[colon+1:scheme_begin]
-        
-            scheme = template[scheme_begin+1:( template.find('#', scheme_begin+1) )] 
+             
+            scheme = template[scheme_begin+1:scheme_end] 
         
             for c in context:
                 if (key not in c.keys()) or (value and value != c[key]):
                     continue 
                 html += local_parse(c, scheme) + '\n'
 
-            i = ( template.find('@', i+1) + 1 ) 
+            i = ( scheme_end + 1 ) 
         elif template[i] == '#':
             end_of_scheme = template.find('#', i+1)
             html += local_parse(context[0], template[i+1:end_of_scheme]) 
